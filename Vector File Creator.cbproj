@@ -124,6 +124,13 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <BCC_UseClassicCompiler>false</BCC_UseClassicCompiler>
+        <LinkPackageImports>rtl.bpi;vcl.bpi</LinkPackageImports>
+        <ILINK_UserVersion>1.0</ILINK_UserVersion>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Build>1</VerInfo_Build>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.1.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Release>1</VerInfo_Release>
     </PropertyGroup>
     <ItemGroup>
         <CppCompile Include="Apt_area.cpp">
@@ -133,6 +140,10 @@
         <CppCompile Include="Dempatch.cpp">
             <DependentOn>Dempatch.h</DependentOn>
             <BuildOrder>13</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="DSF_Utils.cpp">
+            <DependentOn>DSF_Utils.h</DependentOn>
+            <BuildOrder>14</BuildOrder>
         </CppCompile>
         <CppCompile Include="Gridwriter.cpp">
             <DependentOn>Gridwriter.h</DependentOn>
@@ -183,6 +194,9 @@
             <DependentOn>walker.h</DependentOn>
             <BuildOrder>12</BuildOrder>
         </CppCompile>
+        <None Include="xpfstructs.h">
+            <BuildOrder>15</BuildOrder>
+        </None>
         <FormResources Include="Vec_creator.dfm"/>
         <FormResources Include="RCoords.dfm"/>
         <BuildConfiguration Include="Release">
@@ -273,14 +287,14 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName=".\Win32\Debug\Vector File Creator.tds" Configuration="Debug" Class="DebugSymbols">
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32c260mt.dll" Class="DependencyModule">
                     <Platform Name="Win32">
-                        <RemoteName>Vector_File_Creator.tds</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32c260mt.dll" Class="DependencyModule">
+                <DeployFile LocalName=".\Win32\Release\Vector File Creator.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32">
+                        <RemoteName>Vector_File_Creator.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

@@ -96,9 +96,21 @@ object Form1: TForm1
     end
     object DEMS1: TMenuItem
       Caption = 'DEMS'
-      object PatchtileDEM1: TMenuItem
-        Caption = 'Patch tile DEM'
-        OnClick = PatchtileDEM1Click
+      object ExtractDSFDEM1: TMenuItem
+        Caption = 'Extract DSF DEM'
+        OnClick = ExtractDSFDEM1Click
+      end
+      object PatchtileHGT1: TMenuItem
+        Caption = 'Patch tile HGT file'
+        OnClick = PatchtileHGT1Click
+      end
+      object PatchDSFDEM1: TMenuItem
+        Caption = 'Patch DSF DEM'
+        OnClick = PatchDSFDEM1Click
+      end
+      object PatchDSFBIL1: TMenuItem
+        Caption = 'Patch DSF BIL'
+        OnClick = PatchDSFBIL1Click
       end
     end
   end

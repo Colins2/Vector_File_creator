@@ -9,7 +9,7 @@ This started life as a way to get runway information in the form of a polygon fr
 It was always the intention to display this polygon over a raster of the DEM data from various sources with a view to changing 
 the data to more correctly model the 'real world' - basically, that which is seen on Google Earth.
 
-After the runway endpoints were read, either from the apt.dat file or from coordinates read in from the dialog box, the corner 
+After the runway endpoints are read, either from an apt.dat file or from coordinates read in from the dialog box, the corner 
 points are calculated and the resulting polygon created as a shapefile set.
 After some experimentation, I found that  this was too small an area to be working with due to the size of the pixels. 1 pixel
 is approximately a 30 metre square in X-Plane. Although more detailed elevation data is available, X-Plane cannot display it,
@@ -31,6 +31,5 @@ existing airports.
 
 For some airports, this will be sufficient. For others you may need to do other processing using muxp or Meshtool.
 
-Still to do is to extract the DEM data from the DSF file and write it out for a GIS to use so that it can be edited.
 
-More details will be in the user manual when I have time to write it. 
+More details are in the user manual. 

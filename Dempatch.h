@@ -15,11 +15,13 @@ class Dempatcher
 	~Dempatcher();
 
 	String dmsg;
-	void PatchDem();
+	void PatchHgt();
 	void fputsh(FILE *of, short sh);
 	short fgetsh(FILE *inf);
 	short fgetles(FILE *inf);
 	void fputles(FILE *of, short sh);
+	void PatchDSF();
+    void PatchBIL(); //for testing purposes
 };
 
 

@@ -42,7 +42,10 @@ __published:	// IDE-managed Components
 	TMenuItem *Extractdatafromwalktextfile1;
 	TMenuItem *Creategridwalkfile1;
 	TMenuItem *DEMS1;
-	TMenuItem *PatchtileDEM1;
+	TMenuItem *PatchtileHGT1;
+	TMenuItem *ExtractDSFDEM1;
+	TMenuItem *PatchDSFDEM1;
+	TMenuItem *PatchDSFBIL1;
 	void __fastcall Exit1Click(TObject *Sender);
 	void __fastcall Openinputfile1Click(TObject *Sender);
 	void __fastcall CreateShapefileset1Click(TObject *Sender);
@@ -54,15 +57,19 @@ __published:	// IDE-managed Components
 	void __fastcall Creategridforairportarea1Click(TObject *Sender);
 	void __fastcall Extractdatafromwalktextfile1Click(TObject *Sender);
 	void __fastcall Creategridwalkfile1Click(TObject *Sender);
-	void __fastcall PatchtileDEM1Click(TObject *Sender);
+	void __fastcall PatchtileHGT1Click(TObject *Sender);
+	void __fastcall ExtractDSFDEM1Click(TObject *Sender);
+	void __fastcall PatchDSFDEM1Click(TObject *Sender);
+	void __fastcall PatchDSFBIL1Click(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	LogMsg log;
 	Runway rway;
 	Aptarea aptarea;
 	//Vecstore vecstore;
+    String vmsg;
 	String Copyright = L"© Colin Sare-Soar 2020";
-	String VCversion = L"Vector File Creator v1.0.0.5";
+	String VCversion = L"Vector File Creator v1.0.1.1";
 	String VCmsg = L"Vector File Creator";
 	String CurrDir;
 	String OutDir;

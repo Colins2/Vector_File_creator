@@ -28,6 +28,55 @@ Walker::~Walker()
 	Form1->log.writelog(wmsg.c_str());
 }
 //--------------------------------------------------------------------------
+void Walker::Split_csv(char *s, vector<string> &vcsv, int numstr)
+{
+	//using this function to spilt the CSV file rather than splitline()
+int k = strlen(s)+1;
+int lp = 0, wc = 0;
+char ch;
+string word;
+vcsv.clear();
+do{
+	ch = s[lp];
+	if(ch != 0x2C && ch != '\n'){
+		word += ch;
+		lp++;
+	}else{
+	//reached a space
+		vcsv.push_back (word);
+		word = "";
+		wc++;
+		lp++;
+		if(ch == '\n')
+			return;
+		//now find more spaces - shouldn't be any
+		do{
+			ch = s[lp];
+			lp++;
+			}while(ch == 0x20);
+			lp--;
+	}//end if-else
+	}while(wc < numstr);
+	//we get here after numstr words have been found and vectorized
+	//we've got the number of fields we need just make a string from the rest
+	word = "";
+	do{
+
+		ch = s[lp];
+		if(ch == 0x0a || ch == 0x0d){
+			vcsv.push_back (word);
+			break;
+			}
+		word += ch;
+		lp++;
+
+	}while(ch != 0x0a);
+
+
+
+
+}
+//--------------------------------------------------------------------------
 void Walker::PutShort(ofstream out, short s)
 {
 
@@ -115,6 +164,7 @@ void Walker::ImportWalkerDem()
 	//read the received text file with elevations and make something
 	//out of the data. BIL/HDR set or .bt file? Can't make .hgt because
 	//not starting on boundary
+	//***************make the input file a .csv*******************
 	wchar_t winfile[MAXFILE];
 	wchar_t indrv[MAXDRIVE];
 	wchar_t inpath[MAXPATH];
@@ -126,11 +176,11 @@ void Walker::ImportWalkerDem()
 	wchar_t prjfile[MAXFILE]; //standard Esri
 	wchar_t grdfile[MAXFILE];
 	char inbuf[128];
-	vector<string> split;
+	vector<string> vcsv;
 
 	Form1->OpenDialog1->Title = _D("Select walk elevations file");
 	Form1->OpenDialog1->InitialDir = Form1->OutDir;
-	Form1->OpenDialog1->Filter = _D("Grid elevation files (*.txt) | *.TXT");
+	Form1->OpenDialog1->Filter = _D("Grid elevation files (*.csv) | *.CSV");
 	if(Form1->OpenDialog1->Execute()){
 		wcscpy(winfile, Form1->OpenDialog1->FileName.c_str());
 		}else{
@@ -229,6 +279,7 @@ void Walker::ImportWalkerDem()
 //all files open
 //read the walk text file
 //first line is just column headers
+//if from google, need to add the first column? or take away if from USGS
 	char fileln[80];
 	char *endptr;
 	double ULY = 0, ULX = 0, elevd = 0;
@@ -238,22 +289,22 @@ void Walker::ImportWalkerDem()
 	//we know how many entries there are but will have to read something for other cases
 	//we need to extract UL coordinates from the 1st record
 	fgets(inbuf, 128, edat);
-	Form1->rway.SplitLine(inbuf, split, 4);
-	ULY = strtod(split[1].c_str(), &endptr);
+	Split_csv(inbuf, vcsv, 3);
+	ULY = strtod(vcsv[0].c_str(), &endptr);
 	double ULYMAP = ULY + (1/2400);
-	ULX = strtod(split[2].c_str(), &endptr);
+	ULX = strtod(vcsv[1].c_str(), &endptr);
 	double ULXMAP = ULX - (1/2400);
-	elevd = strtod(split[3].c_str(), &endptr); //rounding?
+	elevd = strtod(vcsv[2].c_str(), &endptr); //rounding?
 	elev[0] = round(elevd);
-	split.clear();
+	//vcsv.clear();
 
 	for(int i = 1; i < numrecs; i++){
 		fgets(inbuf, 128, edat);
-		Form1->rway.SplitLine(inbuf, split, 4);
+		Split_csv(inbuf, vcsv, 3);
 		//do something with the split[3] elevation
-		elevd = strtod(split[3].c_str(), &endptr);
+		elevd = strtod(vcsv[2].c_str(), &endptr);
 		elev[i] = round(elevd);
-		split.clear();
+		//vcsv.clear();
 		}
 	union{
 		short ins;

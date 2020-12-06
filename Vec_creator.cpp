@@ -21,6 +21,7 @@
 #include "Gridwriter.h"
 #include "walker.h"
 #include "Dempatch.h"
+#include "DSF_Utils.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -131,14 +132,45 @@ void __fastcall TForm1::Creategridwalkfile1Click(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::PatchtileDEM1Click(TObject *Sender)
+void __fastcall TForm1::PatchtileHGT1Click(TObject *Sender)
 {
 	//Load the data from the edited / downloaded patch and merge it into
 	//an existing DEM / HGT file
 
 	Dempatcher dempatcher;
-	dempatcher.PatchDem();
+	dempatcher.PatchHgt();
 
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::ExtractDSFDEM1Click(TObject *Sender)
+{
+	//extract the DEM block from a DSF file
+	Dsffile dsffile;
+	//vmsg = _D("Ready to extract....");
+	//log.writelog(vmsg.c_str());
+	dsffile.Dsf_main();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::PatchDSFDEM1Click(TObject *Sender)
+{
+	//Apply the patch grid to the dsf grid and write the dsf file
+	//need to find the hashkey code.
+	//Dsffile dsffile;
+	//vmsg = _D("Ready to patch....");
+	//log.writelog(vmsg.c_str());
+	Dempatcher dempatcher;
+	dempatcher.PatchDSF();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::PatchDSFBIL1Click(TObject *Sender)
+{
+	//apply the patch file to the generated BIL file for testing / checking
+	//Dsffile::Dsffile;
+	Dempatcher dempatcher;
+	dempatcher.PatchBIL();
 }
 //---------------------------------------------------------------------------
 

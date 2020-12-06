@@ -2,12 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dir.h>
+#include <fstream>
 
 #pragma hdrstop
 #include "Vec_creator.h"
 #include "VFCheaders.h"
 #include "Apt_area.h"
 #include "Dempatch.h"
+#include "xpfstructs.h"
+#include "DSF_Utils.h"
 
 
 //---------------------------------------------------------------------------
@@ -76,7 +79,8 @@ void Dempatcher::fputles(FILE *of, short sh)
 
 }
 //--------------------------------------------------------------------------
-void Dempatcher::PatchDem()
+//******TODO***** re-write using streams and Strings or combine with BIL?
+void Dempatcher::PatchHgt()
 {
 	//should be able to do most of it in 1 function but if using FILE
 	//then we can use s function call for reading / writing short ints
@@ -306,3 +310,310 @@ void Dempatcher::PatchDem()
 	//should be done!
 }   //exit
 //---------------------------------------------------------------------------
+void Dempatcher::PatchDSF()
+//patch the extracted dsf dem block and re-write the file
+//or patch the dsf directly?
+{
+	String grdfile, patchfile, dsffile;
+	long demd_address = 0;
+
+	//get the patch as a BIL file.
+	//not big so load into a 1 dimension array
+	//need to open the .grd file as well to get the dimensions
+	Form1->OpenDialog1->Title = _D(" Select the grid file");
+	Form1->OpenDialog1->InitialDir = Form1->OutDir.c_str();
+	Form1->OpenDialog1->Filter = _D("Grid files (*.grd) | *.GRD");
+	if(Form1->OpenDialog1->Execute()){
+		grdfile = Form1->OpenDialog1->FileName.c_str();
+		}else{
+		return;
+	}
+
+	Form1->OpenDialog1->Title = _D(" Select the dsf file to patch");
+	Form1->OpenDialog1->InitialDir = Form1->InDir.c_str();
+	Form1->OpenDialog1->Filter = _D("dsf files (*.dsf) | *.DSF");
+	if(Form1->OpenDialog1->Execute()){
+		dsffile = Form1->OpenDialog1->FileName.c_str();
+		}else{
+		return;
+	}
+
+	Form1->OpenDialog1->Title = _D(" Select the patch file");
+	Form1->OpenDialog1->InitialDir = Form1->OutDir.c_str();
+	Form1->OpenDialog1->Filter = _D("Grid files (*.bil) | *.BIL");
+	if(Form1->OpenDialog1->Execute()){
+		patchfile = Form1->OpenDialog1->FileName.c_str();
+		}else{
+		return;
+	}
+
+	//read the grid file first
+	ifstream ingrd(grdfile.c_str(), ios::binary);
+	if(!ingrd){
+		Application->MessageBox(_D("Failed opening grid file"),
+			Form1->VCmsg.c_str(), MB_OK );
+			return;
+	}
+
+	ifstream inbil(patchfile.c_str(), ios::binary);
+	if(!inbil){
+		Application->MessageBox(_D("Failed opening patch file"),
+			Form1->VCmsg.c_str(), MB_OK );
+			ingrd.close();
+			return;
+	}
+
+	//open the dsf file for reading to find the address to write to.
+	fstream indsf(dsffile.c_str(), ios::in | ios::out | ios::binary);
+	if(!inbil){
+		Application->MessageBox(_D("Failed opening dsf file"),
+			Form1->VCmsg.c_str(), MB_OK );
+			ingrd.close();
+			inbil.close();
+			return;
+	}
+
+		// all files open
+	//Now start to read the dsf
+	auto *dshd = new DSFheader;
+	auto *dsat = new DSFatom;
+	auto *demr = new DEMIrec;
+	auto *grh = new Grd_header;
+	auto *grd = new Grd_data;
+
+	long alen = 0;
+	char atname[5];
+	long indsptr;
+	char ch;
+	union{
+		int ian;
+		char can[4];
+	};
+	indsf.read((char *) dshd, sizeof(DSFheader));
+	//check magic?
+	if(strncmp(dshd->magic, "XPLNEDSF", 8)){
+		Application->MessageBox(_D("X-Plane signature not present."),
+			Form1->VCmsg.c_str(), MB_OK);
+		indsf.close();
+		inbil.close();
+		ingrd.close();
+		return;
+	}
+	//now read the atoms
+	for(int i = 0; i < 4; i++){
+	indsf.read((char *)dsat, sizeof(DSFatom));
+	//ian = SWAP_INT32(dsat->ianame);
+	//strncpy(atname, can, 4);
+	alen = dsat->asize;
+	indsf.seekg(alen-8, ios::cur);
+	}
+	//now at DEMS
+	indsf.read((char *)dsat, sizeof(DSFatom));
+	//ian = SWAP_INT32(dsat->ianame);
+	//strncpy(atname, can, 4);
+	alen = dsat->asize; //not interested address of eof before md5
+	//read DEMI atom
+	indsf.read((char *)dsat, sizeof(DSFatom));
+	//nothing to do with this info
+	indsf.read((char *)demr, sizeof(DEMIrec));
+	//check stuff?
+	indsf.read((char *)dsat, sizeof(DSFatom)); //DEMD
+	//store this address for re-writing?
+	demd_address = indsf.tellg();
+	//try to open read-write instead - done!
+	indsf.seekp(indsf.tellg());
+	//put pointer at write position for data
+	//read the grd file data
+	ingrd.read((char *)grh, sizeof(Grd_header));
+	ingrd.read((char *)grd, sizeof(Grd_data));
+	int dsfrow = grd->southpix;
+	int dsfcol = grd->westpix;
+	int pcols = grd->xrange;
+	int prows = grd->yrange;
+	/*
+	short **demblk;
+	demblk = new short* [rows];
+	for(int i = 0; i < rows; i++){
+		demblk[i] = new short [cols];
+	}
+	*/
+	//due to the order of the data values we will have to use a 2d array
+	short **patchval;
+	patchval = new short* [grd->yrange];
+		for(int i = 0; i < grd->yrange; i++){
+			patchval[i] = new short [grd->xrange];
+		}
+	for(int i = 0; i < grd->yrange; i++){
+		for(int j = 0; j < grd->xrange; j++){
+			patchval[i][j] = Dsffile::sgetsh(inbil);
+		}
+	}
+
+	//patchval block is top-down
+
+	//The DSF dem data block is written bottom up i.e. from the SW corner
+	//instead of BIL style or HGT from NW downwards
+
+	int pc = 0; //patchval count
+	//the  dsf data block is effectively a continuous stream of points
+	//so we have to count down 1201 (wide) * northpix + west pix to get to
+	//the first point to replace.
+	int dsfpoint = ((dsfrow * 1201) + dsfcol)*2;
+	indsf.seekp(dsfpoint, ios::cur);
+	for(int i = prows-1; i >= 0; i--){
+		for(int j = 0; j < pcols; j++){
+			Dsffile::sputsh(indsf, patchval[i][j]);
+			//the file pointer will increment itself
+			pc++;
+		}
+		indsf.seekp((1201-pcols)*2, ios::cur);
+	}
+	//that should be it. it's written to the dsf directly, so how to check?
+	//could check the same method using the dsf .bil file in the patchdem function
+
+	//delete and close stuff
+	delete dshd;
+	delete dsat;
+	delete demr;
+    for(int i = 0; i < grd->yrange; i++){
+		delete patchval[i];
+	}
+	delete [] patchval;
+	delete grh;
+	delete grd;
+
+
+	indsf.close();
+	inbil.close();
+	ingrd.close();
+
+}
+//----------------------------------------------------------------------------
+void Dempatcher::PatchBIL()
+	/*This function is more or less the same as patching the HGT file apart from
+	  the fact that you are working with a generated file that can easily be
+	  made again if it is not correct. Patching the HGT file wrongly means you
+	  will have to download it again (or get it from your downloads).
+	  Similarly, patching the DSF directly is non-reversable. I don't see the
+	  need for the extra code.
+	  Patching the BIL file, which is derived from the DSF, will allow easy
+	  checking in (say) QGis with the runway and airport area polygons showing
+	  as well
+	  It will overwrite the existing 'tilename'.BIL
+	*/
+{
+String grdfile, patchfile, bilfile;
+	long demd_address = 0;
+
+	//get the patch as a BIL file.
+	//not big so load into a 1 dimension array
+	//need to open the .grd file as well to get the dimensions
+	Form1->OpenDialog1->Title = _D(" Select the grid file");
+	Form1->OpenDialog1->InitialDir = Form1->OutDir.c_str();
+	Form1->OpenDialog1->Filter = _D("Grid files (*.grd) | *.GRD");
+	if(Form1->OpenDialog1->Execute()){
+		grdfile = Form1->OpenDialog1->FileName.c_str();
+		}else{
+		return;
+	}
+
+	Form1->OpenDialog1->Title = _D(" Select the (dsf)BIL file to patch");
+	Form1->OpenDialog1->InitialDir = Form1->InDir.c_str();
+	Form1->OpenDialog1->Filter = _D("BIL files (*.bil) | *.BIL");
+	if(Form1->OpenDialog1->Execute()){
+		bilfile = Form1->OpenDialog1->FileName.c_str();
+		}else{
+		return;
+	}
+
+	int retval = Application->MessageBox(_D("****WARNING******\n"
+			"This file will be overwritten if you proceed"),
+			Form1->VCmsg.c_str(), MB_OKCANCEL);
+
+	//if(retval == 6)//cancel
+	//	return; //nothing to close
+
+
+	Form1->OpenDialog1->Title = _D(" Select the patch file");
+	Form1->OpenDialog1->InitialDir = Form1->OutDir.c_str();
+	Form1->OpenDialog1->Filter = _D("Grid files (*.bil) | *.BIL");
+	if(Form1->OpenDialog1->Execute()){
+		patchfile = Form1->OpenDialog1->FileName.c_str();
+		}else{
+		return;
+	}
+
+	//read the grid file first
+	ifstream ingrd(grdfile.c_str(), ios::binary);
+	if(!ingrd){
+		Application->MessageBox(_D("Failed opening grid file"),
+			Form1->VCmsg.c_str(), MB_OK );
+			return;
+	}
+
+	ifstream inbil(patchfile.c_str(), ios::binary);
+	if(!inbil){
+		Application->MessageBox(_D("Failed opening patch file"),
+			Form1->VCmsg.c_str(), MB_OK );
+			ingrd.close();
+			return;
+	}
+
+	//open the tilename.bil file for reading to find the address to write to.
+	fstream outbil(bilfile.c_str(), ios::in | ios::out | ios::binary);
+	if(!outbil){
+		Application->MessageBox(_D("Failed opening bil file"),
+			Form1->VCmsg.c_str(), MB_OK );
+			ingrd.close();
+			inbil.close();
+			return;
+	}
+
+		// all files open
+
+	auto *grh = new Grd_header;
+	auto *grd = new Grd_data;
+
+	//read the grd file data
+	ingrd.read((char *)grh, sizeof(Grd_header));
+	ingrd.read((char *)grd, sizeof(Grd_data));
+	auto *patchval = new short[grh->recnum];
+	//read the data from the inbil file
+	for(int i = 0; i < grh->recnum; i++){
+		patchval[i] = Dsffile::sgetsh(inbil);
+	}
+	//all values read into a continuous buffer
+	int dsfcol = grd->westpix;
+	int dsfrow = 1201 - grd->northpix + 1;
+	//should be the NW corner
+	int pcols = grd->xrange;
+	int prows = grd->yrange;
+	int pc = 0; //patchval count
+	//the  dsf data block is effectively a continuous stream of points
+	//so we have to count down 1201 (wide) * northpix + west pix to get to
+	//the first point to replace.
+	int dsfpoint = ((dsfrow * 1201) + dsfcol)*2; //2 bytes per point
+	outbil.seekp(dsfpoint, ios::beg); //start from the beginning as this is a BIL file
+	for(int i = 0; i < prows; i++){
+		for(int j = 0; j < pcols; j++){
+			Dsffile::sputsh(outbil, patchval[pc]);
+			//the file pointer will increment itself
+			pc++;
+		}
+		outbil.seekp((1201-pcols)*2, ios::cur);  //next row
+	}
+
+	//delete and close stuff
+	delete grh;
+	delete grd;
+	delete [] patchval;
+
+	outbil.close();
+	inbil.close();
+	ingrd.close();
+
+}
+//---------------------------------------------------------------------------
+
+
+
