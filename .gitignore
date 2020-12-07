@@ -3,4 +3,6 @@
 /Win64/
 ./vecstore.*
 ./Shapewrite.*
-
+/__astcache
+/__history
+/__recovery
