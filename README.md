@@ -26,10 +26,12 @@ utilities. GPS visualizer is the site I have used for testing.
 
 All this data can be compared onscreen and edited by various means. Using QGis and the Serval plugin, for example allows
 direct editing of the SRTM data, or you can edit/create a patch file and then apply the patch. Note that just now, you can patch
-or edit a DEM file but then will need to process it with Meshtool, which is a simple operation, but might affect other 
+or edit a SRTM DEM file but then will need to process it with Meshtool, which is a simple operation, but might affect other 
 existing airports.
+I have added the functions to patch the dsf dem data directly
 
 For some airports, this will be sufficient. For others you may need to do other processing using muxp or Meshtool.
 
+See the user manual for more details.
 
 More details are in the user manual. 
