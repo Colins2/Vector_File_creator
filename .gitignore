@@ -1,0 +1,6 @@
+./*.local
+/Win32/
+/Win64/
+./vecstore.*
+./Shapewrite.*
+
