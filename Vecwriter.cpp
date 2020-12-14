@@ -18,14 +18,12 @@ using namespace std;
 
 Vecwriter::Vecwriter()
 {
-	vmsg = _D("New Vecwriter created");
-	Form1->log.writelog(vmsg.c_str());
+
 }
 //---------------------------------------------------------------------------
 Vecwriter::~Vecwriter()
 {
-	vmsg = _D("Vecwriter destroyed");
-	Form1->log.writelog(vmsg.c_str());
+
 }
 //---------------------------------------------------------------------------
 void Vecwriter::WriteVectorFile(vector<LatLonPoint> vllp, int numpts)
@@ -57,29 +55,25 @@ void Vecwriter::WriteVectorFile(vector<LatLonPoint> vllp, int numpts)
 	vph->recno = 0;
 	vph->s_type = 5;
 	memset(vph->v_icao, NULL, 8);
-	memset(vph->v_name_ID, NULL, 8);  //reader can get from filename
+	memset(vph->v_name_ID, NULL, 24);
+	memset(vph->v_tile, NULL, 8);
+	memset(vph->v_feature, NULL, 9);
+
 	//strcpy(vph->v_feature, Vecfeature.c_str());
 	UnicodeToUtf8(vph->v_feature, Vecfeature.c_str(),9);
 	UnicodeToUtf8(vph->v_icao, Vecicao.c_str(), 8);
+	UnicodeToUtf8(vph->v_name_ID, Vecname.c_str(), 24);
+	UnicodeToUtf8(vph->v_tile, Vectile.c_str(), 8);
 	strcpy(vph->v_apt_type, "Land");
-	memset(vph->pad, NULL, 117);
-	vph->nbound = nbound;
-	vph->sbound = sbound;
-	vph->wbound = wbound;
-	vph->ebound = ebound;
+	vph->v_rwidth = Getrwidth();
+	memset(vph->pad, NULL, 85);
+	vph->nbound = Getnbound();
+	vph->sbound = Getsbound();
+	vph->wbound = Getwbound();
+	vph->ebound = Getebound();
 
 	ovec.write((char *) vph, sizeof(VFC_polygon_header));
 
-	//now to get the points and write them
-	/*
-	for(llpi = llp.begin(); llpi < llp.end(); llpi++){
-		vecout = FloatToStrF(llpi->lat, ffFixed, 15, 10) + ", " +
-					FloatToStrF(llpi->lon, ffFixed, 15, 10);
-		UnicodeToUtf8(vecoutc, vecout.c_str(), 80);
-		strcat(vecoutc, "\n");
-		fputs(vecoutc, otxt);
-	}
-	*/
 	for(vi = vllp.begin(); vi < vllp.end(); vi++){
 		vpp->plat = vi->lat;
 		vpp->plon = vi->lon;

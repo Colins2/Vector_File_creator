@@ -71,6 +71,10 @@ object Form1: TForm1
         Caption = 'Create runway polygon from input file '
         Enabled = False
       end
+      object CreateCSVfilefromKMLprofile1: TMenuItem
+        Caption = 'Create CSV file from KML runway profile'
+        OnClick = CreateCSVfilefromKMLprofile1Click
+      end
     end
     object Area1: TMenuItem
       Caption = 'Area'
@@ -111,6 +115,20 @@ object Form1: TForm1
       object PatchDSFBIL1: TMenuItem
         Caption = 'Patch DSF BIL'
         OnClick = PatchDSFBIL1Click
+      end
+    end
+    object MUXP1: TMenuItem
+      Caption = 'MUXP'
+      object Createmuxpinputfile1: TMenuItem
+        Caption = 'Create muxp input file'
+        OnClick = Createmuxpinputfile1Click
+      end
+    end
+    object About1: TMenuItem
+      Caption = 'Help'
+      object About2: TMenuItem
+        Caption = 'About'
+        OnClick = About2Click
       end
     end
   end

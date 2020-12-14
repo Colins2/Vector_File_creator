@@ -33,6 +33,8 @@ __published:	// IDE-managed Components
 	TLabel *Label7;
 	TLabel *Label9;
 	TEdit *icao;
+	TLabel *Label10;
+	TEdit *Tilename;
 	void __fastcall SubmitBtnClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations

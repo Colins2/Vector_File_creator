@@ -22,26 +22,17 @@
 //---------------------------------------------------------------------------
 Shpwriter::~Shpwriter()
 {
-   //needed?
-	shmsg = L"shpwriter object deleted";
-	Form1->log.writelog(shmsg.c_str());
+
 }
 //---------------------------------------------------------------------------
 Shpwriter::Shpwriter()
 {
-	//needed?
-	shmsg = L"new shpwriter object created";
-	Form1->log.writelog(shmsg.c_str());
+
 }
 //---------------------------------------------------------------------------
 void Shpwriter::ShpMain()
 {
-	//main function
-	//Shpwriter *shw = new Shpwriter;
-	//do some stuff
 
-	//delete shw;
-	//return
 }
 //--------------------------------------------------------------------------
 void Shpwriter::vstrnset(char *buffer, char ch, int count)

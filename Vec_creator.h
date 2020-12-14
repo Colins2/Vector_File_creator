@@ -46,6 +46,11 @@ __published:	// IDE-managed Components
 	TMenuItem *ExtractDSFDEM1;
 	TMenuItem *PatchDSFDEM1;
 	TMenuItem *PatchDSFBIL1;
+	TMenuItem *CreateCSVfilefromKMLprofile1;
+	TMenuItem *MUXP1;
+	TMenuItem *Createmuxpinputfile1;
+	TMenuItem *About1;
+	TMenuItem *About2;
 	void __fastcall Exit1Click(TObject *Sender);
 	void __fastcall Openinputfile1Click(TObject *Sender);
 	void __fastcall CreateShapefileset1Click(TObject *Sender);
@@ -61,6 +66,9 @@ __published:	// IDE-managed Components
 	void __fastcall ExtractDSFDEM1Click(TObject *Sender);
 	void __fastcall PatchDSFDEM1Click(TObject *Sender);
 	void __fastcall PatchDSFBIL1Click(TObject *Sender);
+	void __fastcall CreateCSVfilefromKMLprofile1Click(TObject *Sender);
+	void __fastcall Createmuxpinputfile1Click(TObject *Sender);
+	void __fastcall About2Click(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	LogMsg log;
@@ -69,11 +77,14 @@ public:		// User declarations
 	//Vecstore vecstore;
     String vmsg;
 	String Copyright = L"© Colin Sare-Soar 2020";
-	String VCversion = L"Vector File Creator v1.0.1.1";
+	String VCversion = L"Vector File Creator v0.1.10";
 	String VCmsg = L"Vector File Creator";
-	String CurrDir;
-	String OutDir;
-	String InDir; //for holding text files, if ever needed
+	String CurrDir; //to get install directory
+	String OutDir; //all output written here
+	String InDir; //for holding input files.
+	String TileName;
+	String AptName;
+    String Aicao;
 
 
 

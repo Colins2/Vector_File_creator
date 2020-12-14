@@ -24,14 +24,14 @@ using namespace std;
 //---------------------------------------------------------------------------
 Dsffile::Dsffile()
 {
-	dsmsg = _D("New Dsffile object created");
-	Form1->log.writelog(dsmsg.c_str());
+	//dsmsg = _D("New Dsffile object created");
+	//Form1->log.writelog(dsmsg.c_str());
 }
 //--------------------------------------------------------------------------
 Dsffile::~Dsffile()
 {
-	dsmsg = _D("Dsffile object destroyed");
-	Form1->log.writelog(dsmsg.c_str());
+	//dsmsg = _D("Dsffile object destroyed");
+	//Form1->log.writelog(dsmsg.c_str());
 }
 //---------------------------------------------------------------------------
 void Dsffile::ExtractFarDem()
@@ -113,7 +113,7 @@ void Dsffile::WriteDSF()
 //---------------------------------------------------------------------------
 int Dsffile::CopyDSF(String id, String od)
 {
-    bool copied = false;
+	bool copied = false;
 
 	//check if already there and ask if want to overwrite
 	if(FileExists(od)){
@@ -211,9 +211,6 @@ void Dsffile::Dsf_main()
 	String z7name = _D("7z") + dsfname;
 	z7dsf = Form1->InDir + "\\7z" + dsfname;
 
-	//for checking
-	//String odname = Outdsf;
-	//Form1->log.writelog(Outdsf.c_str());//OK
 	int copyok = CopyDSF(Indsf, Outdsf);
 	//show copy status
 		switch (copyok){
@@ -258,11 +255,11 @@ void Dsffile::Dsf_main()
 				break;
 			}
 
-	//now we can call the extract routine
+	//now we can call the extract routine - cancelled!
+	//**********************************************************************
+	//cannot compile 7zip library with Borland or Clang (GCC) Nor with QT5.x
+	//**********************************************************************
 
-	//for now, extracted by hand so get on with it!
-	//the file will be called eg -06+149.dsf as extracted from the 7zip archive
-	//so we can use the String "Outdsf" for file operations
 	//check we have an uncompressed dsf file
 	if(!FileExists(Outdsf.c_str())){
 		Application->MessageBox(_D("Can't find DSF file"),
@@ -276,8 +273,6 @@ void Dsffile::Dsf_main()
 				 Form1->VCmsg.c_str(), MB_OK);
 			return; //no point in continuing
 		}
-
-	//create a bil/hdr/prj & bt set so that we can view it in QGis / GM
 
 	String Dembil = ChangeFilePath(Outdsf, Form1->OutDir);
 	String Demhdr = Dembil;
@@ -314,8 +309,7 @@ void Dsffile::Dsf_main()
 		ohdr.close();
 		return;
 	}
-	// all files open
-	//Now start to read the dsf
+
 	auto *dshd = new DSFheader;
 	auto *dsat = new DSFatom;
 	auto *demr = new DEMIrec;
@@ -357,11 +351,7 @@ void Dsffile::Dsf_main()
 	dsfin.read((char *)demr, sizeof(DEMIrec));
 	//check stuff?
 	dsfin.read((char *)dsat, sizeof(DSFatom)); //DEMD
-	//store this address for re-writing?
-	//can get address of FAR DEMI here.
-	//now at the start of the dems
-	//all the dem blocks from system dsf files will be 1201 x 1201
-	//create the array
+
 	short inpt;
 	int cols = 1201, rows = 1201;
 	short **demblk;
@@ -433,19 +423,13 @@ void Dsffile::Dsf_main()
 	sprintf(fileln,"YDIM        %0.9f\n",ydim);
 	ohdr << fileln;
 	ohdr.close();
-	/*
-	dsmsg = _D("HDR file written");
-	Form1->log.writelog(dsmsg.c_str());
-	*/
+
 	//prj file
 	oprj << "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",";
 	oprj << "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM";
 	oprj << "[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]]";
 	oprj.close();
-	/*
-	dsmsg = _D("PRJ file written");
-	Form1->log.writelog(dsmsg.c_str());
-	*/
+
 	delete dsat;
 	delete demr;
 	delete dshd;

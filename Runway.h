@@ -44,15 +44,16 @@ public:
 	double mhdg; //low end to high end i.e. always 0 to 179
 	double width;
 	double chdg; //calculate it anyway
-	String AptName;
-    String icao;
+	//String AptName;
+	//String icao;
 	//no need for the length
 	double RAD = (180/M_PI);
 	void setlolat(double z){lolat = z;};
-	void setaname(String s){AptName = s;};
+	//void setaname(String s){AptName = s;};
 
 	//functions can use local variables, no need to be in here
 	String rmsg; // = L"In Runway Class";
+    wchar_t rwmsg[80];
 	String Infile;
 	String Shapefile;
 	String Shxfile;
@@ -64,6 +65,7 @@ public:
 	void RwyMain(int source); //entry point to this source file
 	void SplitLine(char *s, vector<string> &split, int numstr);
 	int LL_Mantissa_check(vector<string> &split, int fn);
+    void KMLprofile2CSV();
 
 
 

@@ -10,6 +10,10 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <time.h>
+#include <string>
+#include <sstream>
+#include <dir.h>
+
 #pragma hdrstop
 
 #include "shape.h"
@@ -101,6 +105,7 @@ do{
 void Runway::GetAptDatCoords()  //for the future
 {
 	//This routine gets the coordinates from a project apt.dat file
+	char tn[8]; //for tilename
 	Form1->OpenDialog1->Title = _D("Select a project apt.dat file");
 	Form1->OpenDialog1->Filter = _D("apt.dat files (apt.dat) | APT.DAT");
 	if(Form1->OpenDialog1->Execute()){
@@ -114,8 +119,7 @@ void Runway::GetAptDatCoords()  //for the future
 								  MB_OK);
 		return;
 		}
-	//read the file
-	//routines taken from XPUtils
+
 	vector<string> split;
 	char inbuf[128];
 	char temp[20];
@@ -128,15 +132,9 @@ void Runway::GetAptDatCoords()  //for the future
 	//1st line
 	fgets(inbuf, 128, indat);
 	SplitLine(inbuf, split, 5);
-	//only want the name
-	//strcpy(temp, split[5].c_str());
-	//Form1->rway.AptName = temp;
-	Form1->rway.AptName = UTF8ToUnicodeString(split[5].c_str());
-	Form1->rway.icao = UTF8ToUnicodeString(split[4].c_str());
-	//strcpy(icao, split[4].c_str());
-	//UnicodeToUtf8(icao, split[4], 8);
-	//maybe utf8 to Unicode?
-	//Form1->rway.AptName = UTF8ToUnicodeString(split[5]);
+
+	Form1->AptName = UTF8ToUnicodeString(split[5].c_str());
+	Form1->Aicao = UTF8ToUnicodeString(split[4].c_str());
 
 	split.clear();
 	//do loop to get lines up to the 100 line
@@ -154,6 +152,18 @@ void Runway::GetAptDatCoords()  //for the future
 	  }
 
 	}while(!feof(indat));
+
+	//calculate the tile
+	int tlat = (int)Form1->rway.lolat;
+	if(tlat < 0)
+		tlat -= 1;
+	int tlon = (int)Form1->rway.lolon;
+	char ctlon[5];
+	sprintf(tn, "%+03d", tlat);
+	sprintf(ctlon, "%+04d", tlon);
+	strcat(tn, ctlon);
+	//tn should now be the tilename!
+	Form1->TileName = tn;
 	fclose(indat);
 	split.clear();
 
@@ -172,18 +182,17 @@ void Runway::RwyMain(int source)
 	switch(source){
 
 	case 1:     //use the form
-			//Form1->rway.GetDirectInput();
 			GetDirectInput();
 			Form1->rway.lolat = RwyInput->LElat->Text.ToDouble();
 			Form1->rway.lolon = RwyInput->LElon->Text.ToDouble();
 			Form1->rway.hilat = RwyInput->HElat->Text.ToDouble();
 			Form1->rway.hilon = RwyInput->HElon->Text.ToDouble();
 			Form1->rway.width = RwyInput->Rwidth->Text.ToDouble();
-			Form1->rway.AptName = RwyInput->AptName->Text;
-			Form1->rway.icao = RwyInput->icao->Text;
-			//got the info we need
+			Form1->AptName = RwyInput->AptName->Text;
+			Form1->Aicao = RwyInput->icao->Text;
+			Form1->TileName = RwyInput->Tilename->Text;
 			break;
-	case 2:		//read an apt.dat file and put the values in the rway object
+	case 2:		//read an apt.dat file
 			GetAptDatCoords();
 			break;
 	default:    //no default
@@ -196,8 +205,6 @@ void Runway::RwyMain(int source)
 	vector<LatLonPoint> llp;
 	vector<LatLonPoint>::iterator llpi = llp.begin();
 
-
-	//Vecstore::OpenVecStore();
 	struct tm *sysdate;
 	time_t loctm;
 	//calculation variables
@@ -215,7 +222,7 @@ void Runway::RwyMain(int source)
 	Form1->rway.setaname(L"Simbari");
 	*/
 
-	String filestem = L".\\output\\" + Form1->rway.AptName;
+	String filestem = L".\\output\\" + Form1->AptName;
 	filestem += "_runway";
 	String Atxt = filestem + L".txt";
 	//use the AptName as a file stem
@@ -309,10 +316,12 @@ void Runway::RwyMain(int source)
 	fclose(otxt);
 //set up the .vec file and write it
 		Vecwriter vecwriter;
-		vecwriter.SetVecname(Form1->rway.AptName);
+		vecwriter.SetVecname(Form1->AptName);
 		vecwriter.SetVecfeature(L"Runway");
 		vecwriter.SetVecfilestem(filestem);
-		vecwriter.SetVecicao(icao);
+		vecwriter.SetVecicao(Form1->Aicao);
+		vecwriter.SetRunwayWidth(Form1->rway.width);
+        vecwriter.Vectile = Form1->TileName;
         //do we need a bounding box? - maybe not in the runway file
 		vecwriter.WriteVectorFile(llp, 5);
 
@@ -320,7 +329,7 @@ void Runway::RwyMain(int source)
 //set up the shapefile and write it out
 		Shpwriter shpwriter;
 
-		shpwriter.SetShpname(Form1->rway.AptName);
+		shpwriter.SetShpname(Form1->AptName);
 		shpwriter.SetShpfeature(L"Runway");
 		shpwriter.SetShpfilestem(filestem); //to be modified?
 
@@ -345,5 +354,63 @@ void Runway::RwyMain(int source)
 
 
 	return;    //shpwriter destroyed leaving here
+}
+//---------------------------------------------------------------------------
+void Runway::KMLprofile2CSV()
+{
+	string S, T, U, V;
+	char *endptr;
+	int ns = 0, ne = 0, ln = 0;
+	String inkml, outcsv, csvname;
+	Form1->OpenDialog1->Filter = _D("KML files (*.kml) | *.KML");
+	Form1->OpenDialog1->InitialDir = Form1->InDir;
+	if(Form1->OpenDialog1->Execute())
+	inkml = Form1->OpenDialog1->FileName;
+	ifstream ink(inkml.c_str());
+		if(!ink){
+			Application->MessageBox(_D("Failed to open KML file"),
+			 Form1->VCmsg.c_str(), MB_OK);
+		}
+
+	outcsv = ChangeFilePath(inkml, Form1->OutDir);
+	outcsv = ChangeFileExt(outcsv, _D(".csv"));
+	ofstream ocsv(outcsv.c_str());
+	if(!ocsv){
+		Application->MessageBox(_D("Failed to create CSV file"),
+			Form1->VCmsg.c_str(), MB_OK);
+		ink.close();
+	}
+	//both files open
+	ocsv << "Latitude, Longitude" << endl;
+	do{
+		getline(ink, S);
+		ln++;
+		ns = S.find_first_of('<');
+		ne = S.find_first_of('>');
+		T.clear();
+		T = S.substr(ns+1, ne-1);//gets the tag
+		if(!T.compare(0, 11, "coordinates")){
+			//leave this message in for now
+			swprintf(rwmsg, _D("Found coordinates at line %d"),ln);
+			Form1->log.writelog(rwmsg);
+			break;
+		}
+	}while(!ink.eof());
+
+	getline(ink, S);
+	stringstream X(S);
+	while(getline(X, T, ' ')){
+		//Memo1->Lines->Add(T.c_str()); - for testing
+		stringstream Y(T);
+		getline(Y, U, ',');
+		getline(Y, V, ',');
+
+		ocsv << V << ", " << U << endl;
+	}
+	rmsg = _D("CSV file written to output folder");
+	Form1->log.writelog(rmsg.c_str());
+
+	ink.close();
+	ocsv.close();
 }
 //---------------------------------------------------------------------------

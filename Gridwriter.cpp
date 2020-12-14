@@ -25,14 +25,18 @@ We will just ask for the *.vec file and work from that
 //---------------------------------------------------------------------------
 Gridwriter::Gridwriter()
 {
+/*
 	gmsg = _D("gridwriter object created");
 	Form1->log.writelog(gmsg.c_str());
+	*/
 }
 //--------------------------------------------------------------------------
 Gridwriter::~Gridwriter()
 {
+/*
 	gmsg = _D("gridwriter object destroyed");
 	Form1->log.writelog(gmsg.c_str());
+	*/
 }
 //-------------------------------------------------------------------------
 void Gridwriter::ExtractAptName(char *s)
@@ -68,9 +72,6 @@ void Gridwriter::Writegrid()
 	wchar_t wvext[MAXEXT];
 	wchar_t gridfn[20];
 	wchar_t gridbase[MAXFILE];
-	//String shpfile;
-	//String shxfile;
-	//String dbffile;
 	wchar_t wshpfile[MAXFILE];
 	wchar_t wshxfile[MAXFILE];
 	wchar_t wdbffile[MAXFILE];
@@ -79,7 +80,6 @@ void Gridwriter::Writegrid()
 	//get the vec file name to open
 	Form1->OpenDialog1->InitialDir = Form1->OutDir;
 	Form1->OpenDialog1->Title = _D("Select the Airport vector file");
-	//Form1->OpenDialog1->Filter = _D("KML files (*.kml) | *.KML");
 	Form1->OpenDialog1->Filter = _D("vector files (*.vec) | *.VEC");
 	if(Form1->OpenDialog1->Execute()){
 		wcscpy(wVecname, Form1->OpenDialog1->FileName.c_str());
@@ -93,18 +93,14 @@ void Gridwriter::Writegrid()
 				Form1->VCmsg.c_str(), MB_OK);
 				return;
 		}
-	//shapefile set filenames
-	//UnicodeToUtf8(cvecfn, Vecname.c_str(), MAXFILE);
-	//maybe try with wchar_t instead?
+
 	_wfnsplit(wVecname, wvdr, wvpath, wvecfn, wvext);
-	//filename will be "V_name_Airport_Area"
 	UnicodeToUtf8(cvecfn, wvecfn, MAXFILE);
 	ExtractAptName(cvecfn);
 	strcpy(dbfaname, cvecfn);
 	strcat(cvecfn, "_Grid");
 	Utf8ToUnicode(wvecfn, cvecfn, MAXFILE);
-	//wvecfn now "name_Grid"
-	//make shapefile set
+
 	_wfnmerge(wshpfile, wvdr, wvpath, wvecfn, _D(".shp") );
 	_wfnmerge(wshxfile, wvdr, wvpath, wvecfn, _D(".shx") );
 	_wfnmerge(wdbffile, wvdr, wvpath, wvecfn, _D(".dbf") );
@@ -114,9 +110,7 @@ void Gridwriter::Writegrid()
 	//make the vector file data structs
 	VFC_vector_file_header *vfh = new VFC_vector_file_header;
 	VFC_polygon_header *vph = new VFC_polygon_header;
-	//VFC_poly_point *vpp = new VFC_poly_point; //not needed
-	//read the data in and take the bits we want
-	//there is only 1 record
+
 	invec.read((char *)vfh, sizeof(VFC_vector_file_header));
 	invec.read((char *)vph, sizeof(VFC_polygon_header));
 	//only want the bounding box so we can close now.
@@ -359,23 +353,17 @@ void Gridwriter::Writegrid()
 	}
 	//now to make pairs of coordinates
 	LatLonPoint *llp = new LatLonPoint;
-	//vector<LatLonPoint> vllp;
-	//vector<LatLonPoint>::iterator iv;
+
 	for(int i = pyrange-1; i >= 0; i--){
 		for(int j = 0; j < pxrange; j++){
 			llp->lat = pixlats[i];
 			llp->lon = pixlons[j];
-			//vllp.push_back(llp);
 			ogrd.write((char *)llp, sizeof(LatLonPoint));
 		}
 	}
 
-	//hopefully all in the array now in the correct order
-	//close the grid file
 	ogrd.close();
 	Form1->aptarea.GridFile = wgrdfile;
-	//write the grid details here?
-	//best not. if no filename, say after restart, get it from OpenDialog
 
 	delete gh;
 	delete gd;
@@ -383,8 +371,6 @@ void Gridwriter::Writegrid()
 	gmsg = _D("Grid header file written");
 	Form1->log.writelog(gmsg.c_str());
 
-
-	//draw e/w gridlines using lat array
 	for(int i = 0; i < yrange; i++){
 
 	//shp

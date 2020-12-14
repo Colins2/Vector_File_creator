@@ -21,14 +21,18 @@ using namespace std;
 //---------------------------------------------------------------------------
 Dempatcher::Dempatcher()
 {
+	/*
 	dmsg = _D("Dempatcher created");
 	Form1->log.writelog(dmsg.c_str());
+	*/
 }
 //---------------------------------------------------------------------------
 Dempatcher::~Dempatcher()
 {
+	/*
 	dmsg = _D("Dempatcher destroyed");
 	Form1->log.writelog(dmsg.c_str());
+	*/
 }
 //---------------------------------------------------------------------------
 void Dempatcher::fputsh(FILE *of, short sh)
@@ -274,21 +278,17 @@ void Dempatcher::PatchHgt()
 	short old = 0, snew = 0;
 	for(int i = 0; i < nrows; i++){
 		for(int j = 0; j < ncols; j++){
-			//old = hgtblk[northpix+i][westpix+j];
-			//snew = bilblk[i][j];
 			hgtblk[northpix+i][westpix+j] = bilblk[i][j];
 		}
 	}
 
 	//write out the hgt agaim as the same filename but in the output folder
-	//we can load the hgt file into QGis to check
-	//open hgt for writing
+
 	FILE *ohgt;
 	if((ohgt = _wfopen(outhgt, _D("wb")))== NULL){
 		Application->MessageBox(_D("Failed to create hgt file"),
 			Form1->VCmsg.c_str(), MB_OK);
 	}else{
-		//file opened, write the data
 		for(int i = 0; i < 1201; i++){
 			for(int j = 0; j < 1201; j++){
 				fputles(ohgt, hgtblk[i][j]);
@@ -307,8 +307,7 @@ void Dempatcher::PatchHgt()
 	}
 	delete [] hgtblk;
 
-	//should be done!
-}   //exit
+}
 //---------------------------------------------------------------------------
 void Dempatcher::PatchDSF()
 //patch the extracted dsf dem block and re-write the file
@@ -374,7 +373,6 @@ void Dempatcher::PatchDSF()
 	}
 
 		// all files open
-	//Now start to read the dsf
 	auto *dshd = new DSFheader;
 	auto *dsat = new DSFatom;
 	auto *demr = new DEMIrec;
@@ -420,7 +418,6 @@ void Dempatcher::PatchDSF()
 	indsf.read((char *)dsat, sizeof(DSFatom)); //DEMD
 	//store this address for re-writing?
 	demd_address = indsf.tellg();
-	//try to open read-write instead - done!
 	indsf.seekp(indsf.tellg());
 	//put pointer at write position for data
 	//read the grd file data
@@ -430,13 +427,7 @@ void Dempatcher::PatchDSF()
 	int dsfcol = grd->westpix;
 	int pcols = grd->xrange;
 	int prows = grd->yrange;
-	/*
-	short **demblk;
-	demblk = new short* [rows];
-	for(int i = 0; i < rows; i++){
-		demblk[i] = new short [cols];
-	}
-	*/
+
 	//due to the order of the data values we will have to use a 2d array
 	short **patchval;
 	patchval = new short* [grd->yrange];
@@ -463,7 +454,6 @@ void Dempatcher::PatchDSF()
 	for(int i = prows-1; i >= 0; i--){
 		for(int j = 0; j < pcols; j++){
 			Dsffile::sputsh(indsf, patchval[i][j]);
-			//the file pointer will increment itself
 			pc++;
 		}
 		indsf.seekp((1201-pcols)*2, ios::cur);
@@ -471,7 +461,6 @@ void Dempatcher::PatchDSF()
 	//that should be it. it's written to the dsf directly, so how to check?
 	//could check the same method using the dsf .bil file in the patchdem function
 
-	//delete and close stuff
 	delete dshd;
 	delete dsat;
 	delete demr;
@@ -530,10 +519,6 @@ String grdfile, patchfile, bilfile;
 			"This file will be overwritten if you proceed"),
 			Form1->VCmsg.c_str(), MB_OKCANCEL);
 
-	//if(retval == 6)//cancel
-	//	return; //nothing to close
-
-
 	Form1->OpenDialog1->Title = _D(" Select the patch file");
 	Form1->OpenDialog1->InitialDir = Form1->OutDir.c_str();
 	Form1->OpenDialog1->Filter = _D("Grid files (*.bil) | *.BIL");
@@ -569,8 +554,6 @@ String grdfile, patchfile, bilfile;
 			return;
 	}
 
-		// all files open
-
 	auto *grh = new Grd_header;
 	auto *grd = new Grd_data;
 
@@ -589,21 +572,17 @@ String grdfile, patchfile, bilfile;
 	int pcols = grd->xrange;
 	int prows = grd->yrange;
 	int pc = 0; //patchval count
-	//the  dsf data block is effectively a continuous stream of points
-	//so we have to count down 1201 (wide) * northpix + west pix to get to
-	//the first point to replace.
+
 	int dsfpoint = ((dsfrow * 1201) + dsfcol)*2; //2 bytes per point
-	outbil.seekp(dsfpoint, ios::beg); //start from the beginning as this is a BIL file
+	outbil.seekp(dsfpoint, ios::beg);
 	for(int i = 0; i < prows; i++){
 		for(int j = 0; j < pcols; j++){
 			Dsffile::sputsh(outbil, patchval[pc]);
-			//the file pointer will increment itself
 			pc++;
 		}
 		outbil.seekp((1201-pcols)*2, ios::cur);  //next row
 	}
 
-	//delete and close stuff
 	delete grh;
 	delete grd;
 	delete [] patchval;

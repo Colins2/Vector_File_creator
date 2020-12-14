@@ -78,11 +78,11 @@ object RwyInput: TRwyInput
     ParentFont = False
   end
   object Label8: TLabel
-    Left = 47
-    Top = 184
-    Width = 33
+    Left = 63
+    Top = 220
+    Width = 82
     Height = 16
-    Caption = 'Width'
+    Caption = 'Runway Width'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -13
@@ -91,7 +91,7 @@ object RwyInput: TRwyInput
     ParentFont = False
   end
   object Label6: TLabel
-    Left = 168
+    Left = 70
     Top = 184
     Width = 75
     Height = 16
@@ -104,7 +104,7 @@ object RwyInput: TRwyInput
     ParentFont = False
   end
   object Label7: TLabel
-    Left = 423
+    Left = 335
     Top = 184
     Width = 70
     Height = 16
@@ -117,11 +117,24 @@ object RwyInput: TRwyInput
     ParentFont = False
   end
   object Label9: TLabel
-    Left = 516
+    Left = 456
     Top = 184
     Width = 29
     Height = 16
     Caption = 'ICAO'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
+  object Label10: TLabel
+    Left = 456
+    Top = 220
+    Width = 21
+    Height = 16
+    Caption = 'Tile'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -13
@@ -225,8 +238,8 @@ object RwyInput: TRwyInput
       'W')
   end
   object SubmitBtn: TButton
-    Left = 271
-    Top = 224
+    Left = 289
+    Top = 248
     Width = 75
     Height = 25
     Caption = 'Submit'
@@ -234,24 +247,31 @@ object RwyInput: TRwyInput
     OnClick = SubmitBtnClick
   end
   object Rwidth: TEdit
-    Left = 103
-    Top = 183
+    Left = 168
+    Top = 219
     Width = 41
     Height = 21
     TabOrder = 10
   end
   object AptName: TEdit
-    Left = 256
+    Left = 168
     Top = 183
     Width = 161
     Height = 21
     TabOrder = 11
   end
   object icao: TEdit
-    Left = 559
+    Left = 499
     Top = 183
     Width = 41
     Height = 21
     TabOrder = 12
+  end
+  object Tilename: TEdit
+    Left = 499
+    Top = 219
+    Width = 78
+    Height = 21
+    TabOrder = 13
   end
 end

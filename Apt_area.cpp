@@ -25,21 +25,20 @@
 
 using namespace std;
 
-extern void SplitLine(char *s, vector<string> &split, int numstr);
 /*
 Read a KML file and make a shapefile from it the same as the runway function
 */
 //---------------------------------------------------------------------------
 Aptarea::Aptarea()
 {
-	amsg = L"New AptArea created";
-	Form1->log.writelog(amsg.c_str());
+	//amsg = L"New AptArea created";
+	//Form1->log.writelog(amsg.c_str());
 }
 //---------------------------------------------------------------------------
 Aptarea::~Aptarea()
 {
-	amsg = L"New AptArea created";
-	Form1->log.writelog(amsg.c_str());
+	//amsg = L"New AptArea created";
+	//Form1->log.writelog(amsg.c_str());
 }
 //---------------------------------------------------------------------------
 void Aptarea::ltrim(char *s)
@@ -106,10 +105,9 @@ void Aptarea::Aamain()
 	wcscpy(infile, Inkml.c_str());
 	_wfnsplit(infile, indrv, inpath, infn, inext);
 	// make the filenames
-	String filestem = Form1->OutDir + L"\\V_";
-	//filestem += L"V_";
+	String filestem = Form1->OutDir + "\\";
 	filestem += infn;
-
+	Form1->AptName = infn;
 	Atxtfile = filestem + _D(".txt");
 	Shapefile = filestem + _D(".shp");
 	Shxfile = filestem + _D(".shx");
@@ -153,7 +151,7 @@ void Aptarea::Aamain()
 		}while(ch != ',');
 		//end of first part of coordinate
 		pcnt = 0;
-        do{
+		do{
 			ch = inbuf[bp];
 			bp++;
 			if(ch == ','){ //end of a point
@@ -172,7 +170,7 @@ void Aptarea::Aamain()
 	//got all the points in a vector now
 	int vl = avec.size();
 	//write the coordinates out to a text file the same as for runway.
-    String vecout;
+	String vecout;
 	char vecoutc[40];
 	FILE *otxt;
 
@@ -191,11 +189,11 @@ void Aptarea::Aamain()
 		fputs(vecoutc, otxt);
 	}
 
-	amsg = L"Runway coordinates written to text file";
+	amsg = L"Airport area coordinates written to text file";
 	Form1->log.writelog(amsg.c_str());
 	fclose(otxt);
 	//find the boundaries first
-    //sort the coordinates to find bounding box
+	//sort the coordinates to find bounding box
 	vector<double> v1;
 	vector<double> v2;
 	for(int i = 0; i < avec.size()-1; i++){
@@ -208,14 +206,12 @@ void Aptarea::Aamain()
 	   int v1s = 0, v2s = 0;
 	   v1s = v2s = v1.size()-1;//both the same size
 
-	//set up the .vec file and write it
 		Vecwriter vecwriter;
 
-		vecwriter.SetVecname(Form1->rway.AptName);
-		vecwriter.SetVecicao(Form1->rway.icao); //can be blank
+		vecwriter.SetVecname(Form1->AptName);
+		vecwriter.SetVecicao(Form1->Aicao); //can be blank
 		vecwriter.SetVecfeature(L"Apt_Area");
 		vecwriter.SetVecfilestem(filestem);
-		//write the values to the shpwriter object
 		vecwriter.nbound = v1[v1s];
 		vecwriter.sbound = v1[0];
 		vecwriter.wbound = v2[0];
@@ -223,7 +219,6 @@ void Aptarea::Aamain()
 
 		vecwriter.WriteVectorFile(avec, vl);
 
-	//set up the shapefile and write it out
 		Shpwriter shpwriter;
 
 		shpwriter.SetShpname(infn);
@@ -240,6 +235,6 @@ void Aptarea::Aamain()
 	 //clear the vector
 	 avec.clear();
 
-	return;    //to main menu
+	return;
 }
 //--------------------------------------------------------------------------

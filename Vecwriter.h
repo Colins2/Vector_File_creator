@@ -23,6 +23,7 @@ class Vecwriter
 	String Vecicao;
 	String Vecfeature;
 	String filestem;
+    String Vectile;
 	//********************************************
 	//use these for constructing a grid shapefile.
 	double nbound = 0;
@@ -30,14 +31,20 @@ class Vecwriter
 	double wbound = 0;
 	double ebound = 0;
 	//*******************************************
+	double rwidth = 0;
 	void SetVecname(String s){Vecname = s;};
 	void SetVecfeature(String s){Vecfeature = s;};
 	void SetVecfilestem(String fs){filestem = fs;};
 	void SetVecicao(String ic){Vecicao = ic;};
 	void WriteVectorFile(vector<LatLonPoint> vllp, int numpts);
-
-
+	void SetRunwayWidth(double w){rwidth = w;};
+	double Getrwidth(){return rwidth;};
+	double Getnbound(){return nbound;};
+	double Getsbound(){return sbound;};
+	double Getebound(){return ebound;};
+	double Getwbound(){return wbound;};
 };
+
 
 
 

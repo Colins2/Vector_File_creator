@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <math.h> //dunno if we need it in this file
+#include <math.h>
 #include <vector>
 #include <Filectrl.hpp>
 
@@ -12,29 +12,20 @@
 #pragma hdrstop
 
 #include "Vec_creator.h"
-//#include "shape.h" //for sructures etc.
 #include "logmsg.h"
 #include "Runway.h"
 #include "RCoords.h"
-//#include "vecstore.h"
 #include "VFCheaders.h"
 #include "Gridwriter.h"
 #include "walker.h"
 #include "Dempatch.h"
 #include "DSF_Utils.h"
+#include "MuxpWriter.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 
-/*
-The idea of this utility is to create a vector file or set.
-Initially it will be a shapefile set with maybe MapInfo /KML to follow
-Input will be initially a csv containing just pairs of coordinates.
-Later we will extract the coordinates from a KML file.
-
-
-*/
 
 TForm1 *Form1;
 //---------------------------------------------------------------------------
@@ -49,16 +40,15 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 		CreateDir(OutDir);
 	if(!DirectoryExists(InDir))
 		CreateDir(InDir);
-	//LogMsg log;
-	//Runway rway;
-	//Vecstore vecstore;
+
 	log.writelog(VCversion.c_str());
 	log.writelog(Copyright.c_str());
+	Form1->Caption = VCmsg;
+
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Exit1Click(TObject *Sender)
 {
-    //vecstore.vs.clear();
 	Close();
 }
 //---------------------------------------------------------------------------
@@ -116,9 +106,9 @@ void __fastcall TForm1::Creategridforairportarea1Click(TObject *Sender)
 
 void __fastcall TForm1::Extractdatafromwalktextfile1Click(TObject *Sender)
 {
-	//take the txt file saved from GPSVisualizer.com and extract tha elevations
+	//take the txt file saved from GPSVisualizer.com and extract the elevations
 	Walker walker;
-    walker.ImportWalkerDem();
+	walker.ImportWalkerDem();
 
 }
 //---------------------------------------------------------------------------
@@ -147,8 +137,6 @@ void __fastcall TForm1::ExtractDSFDEM1Click(TObject *Sender)
 {
 	//extract the DEM block from a DSF file
 	Dsffile dsffile;
-	//vmsg = _D("Ready to extract....");
-	//log.writelog(vmsg.c_str());
 	dsffile.Dsf_main();
 }
 //---------------------------------------------------------------------------
@@ -156,10 +144,8 @@ void __fastcall TForm1::ExtractDSFDEM1Click(TObject *Sender)
 void __fastcall TForm1::PatchDSFDEM1Click(TObject *Sender)
 {
 	//Apply the patch grid to the dsf grid and write the dsf file
-	//need to find the hashkey code.
-	//Dsffile dsffile;
-	//vmsg = _D("Ready to patch....");
-	//log.writelog(vmsg.c_str());
+	//need to find the hashkey code?
+
 	Dempatcher dempatcher;
 	dempatcher.PatchDSF();
 }
@@ -168,9 +154,31 @@ void __fastcall TForm1::PatchDSFDEM1Click(TObject *Sender)
 void __fastcall TForm1::PatchDSFBIL1Click(TObject *Sender)
 {
 	//apply the patch file to the generated BIL file for testing / checking
-	//Dsffile::Dsffile;
 	Dempatcher dempatcher;
 	dempatcher.PatchBIL();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::CreateCSVfilefromKMLprofile1Click(TObject *Sender)
+{
+	//create a csv file from the KML runway profile
+	rway.KMLprofile2CSV();
+
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::Createmuxpinputfile1Click(TObject *Sender)
+{
+	//write a muxp file
+	MuxpWriter muxpwriter;
+	muxpwriter.MuxpMain();
+
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::About2Click(TObject *Sender)
+{
+	//make an about dialog box with simple details
 }
 //---------------------------------------------------------------------------
 

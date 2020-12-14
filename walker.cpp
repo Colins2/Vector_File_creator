@@ -14,18 +14,15 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
-extern void SplitLine(char *s, vector<string> &split, int numstr);
 //--------------------------------------------------------------------------
 Walker::Walker()
 {
-	wmsg = _D("New Walker created");
-	Form1->log.writelog(wmsg.c_str());
+
 }
 //--------------------------------------------------------------------------
 Walker::~Walker()
 {
-	wmsg = _D("Walker object destroyed");
-	Form1->log.writelog(wmsg.c_str());
+
 }
 //--------------------------------------------------------------------------
 void Walker::Split_csv(char *s, vector<string> &vcsv, int numstr)

@@ -17,10 +17,6 @@ class Gridwriter
 
 
 	String gmsg;
-	//double nbound;
-	//double sbound;
-	//double ebound;
-	//double wbound;
 	double gridspace; //in degrees
 
 	String filestem;

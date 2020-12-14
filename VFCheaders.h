@@ -56,14 +56,16 @@ struct VFC_polygon_header{
 	double sbound;
 	double wbound;
 	double ebound;
+	double v_rwidth;
 	//**********************************************
 	int s_type; //because shapefiles have it - maybe for the future?
 	char v_icao[8];
 	char v_apt_type[6];
 	char v_feature[9];
-	char v_name_ID[8]; // maybe need a name or other ID?
-	char pad[117]; //future proofing :-)
-	}; //now 192 butes
+	char v_name_ID[24]; // maybe need a name or other ID?
+	char v_tile[8];
+	char pad[85]; //future proofing :-)
+	}; //now 192 butes - still
 
 //struct tile_poly_point{ //maybe can use LatLonPoint? or confusion?
 struct VFC_poly_point{
