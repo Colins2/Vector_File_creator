@@ -1,8 +1,9 @@
-./*.local
+*.local
 /Win32/
 /Win64/
-./vecstore.*
-./Shapewrite.*
+/WinBinary/Zip*
+vecstore.*
+Shapewrite.*
 /__astcache
 /__history
 /__recovery
