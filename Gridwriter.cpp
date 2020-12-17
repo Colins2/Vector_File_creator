@@ -42,10 +42,10 @@ Gridwriter::~Gridwriter()
 void Gridwriter::ExtractAptName(char *s)
 {
 	char temp[MAXFILE];
-	int bp = 0;//miss off the "V_", just want the airport name
+	int bp = 0;
 	char ch;
 	do{
-		ch = s[bp+2];
+		ch = s[bp];
 		if(ch == '_'){
 			temp[bp] = 0x0;
 			break;
@@ -368,8 +368,7 @@ void Gridwriter::Writegrid()
 	delete gh;
 	delete gd;
 	delete llp;
-	gmsg = _D("Grid header file written");
-	Form1->log.writelog(gmsg.c_str());
+
 
 	for(int i = 0; i < yrange; i++){
 
@@ -481,5 +480,7 @@ void Gridwriter::Writegrid()
 	delete spr;
 	delete spp;
 	delete shxr;
+	gmsg = _D("Grid shapefile written");
+	Form1->log.writelog(gmsg.c_str());
 }
 //--------------------------------------------------------------------------

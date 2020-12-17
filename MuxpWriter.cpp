@@ -193,7 +193,7 @@ void MuxpWriter::WriteMuxp()
 
 	omuxp << "cut_polygon.airport:" << endl;
 	omuxp << "   name: clear_airport_to_base_mesh" << endl;
-	omuxp << "   elevation: -37268" << endl;
+	omuxp << "   elevation: -32768" << endl;
 	omuxp << "   coordinates:" << endl;
 	for(int i = 0; i < Abound.size(); i++){
 		omuxp << "\t- " << to_string(Abound[i].plat);
